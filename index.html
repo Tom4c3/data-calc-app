@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>日付から曜日を計算</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 20px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h2>日付から曜日を計算</h2>
+    <input type="date" id="inputDate">
+    <button onclick="calculateDay()">曜日を計算</button>
+    <div id="result"></div>
+
+    <script>
+        function calculateDay() {
+            const inputDate = new Date(document.getElementById('inputDate').value);
+            if (!inputDate.getDate()) {
+                document.getElementById('result').innerText = '有効な日付を入力してください。';
+                return;
+            }
+
+            const year = inputDate.getFullYear();
+            const month = inputDate.getMonth() + 1; // JavaScriptの月は0から始まる
+            const day = inputDate.getDate();
+
+            const monthKeys = [0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5];
+            let monthKey = monthKeys[month - 1];
+
+            // 閏年の調整
+            if ((month === 1 || month === 2) && isLeapYear(year)) {
+                monthKey--;
+            }
+
+            const yearLastTwoDigits = year % 100;
+            const total = yearLastTwoDigits + Math.floor(yearLastTwoDigits / 4) + monthKey + day;
+
+            const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
+            const dayOfWeek = weekDays[total % 7];
+
+            document.getElementById('result').innerText = `${year}年${month}月${day}日は${dayOfWeek}曜日です。`;
+        }
+
+        function isLeapYear(year) {
+            return (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0));
+        }
+    </script>
+</body>
+</html>
