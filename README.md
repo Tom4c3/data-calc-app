@@ -1,3 +1,3 @@
-# date-calc-app
+# day-calc-app
 日付から曜日を計算するアプリ</br>
-https://tom4c3.github.io/date-calc-app/
+https://tom4c3.github.io/day-calc-app/
