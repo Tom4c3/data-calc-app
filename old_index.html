@@ -3,9 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
     <title>day-calc-app</title>
     <style>
         body {
@@ -75,7 +72,23 @@
         <button onclick="resetResult()" class="input-field">結果をリセット</button>
         <div id="result"></div>
         <div id="calculationDetails"></div>
-        <div id="formula"></div>
+        <div id="monthKeyExplanation">
+            <p><strong>月のキーコード:</strong></p>
+            <ul>
+                <li>1月: 0 （閏年は6）</li>
+                <li>2月: 3 （閏年は2）</li>
+                <li>3月: 3</li>
+                <li>4月: 6</li>
+                <li>5月: 1</li>
+                <li>6月: 4</li>
+                <li>7月: 6</li>
+                <li>8月: 2</li>
+                <li>9月: 5</li>
+                <li>10月: 0</li>
+                <li>11月: 3</li>
+                <li>12月: 5</li>
+            </ul>
+        </div>
     </div>
 
     <script>
@@ -86,40 +99,39 @@
                 return;
             }
 
-            let year = inputDate.getFullYear();
-            let month = inputDate.getMonth() + 1;
+            const year = inputDate.getFullYear();
+            const month = inputDate.getMonth() + 1;
             const day = inputDate.getDate();
 
-            if (month < 3) {
-                month += 12;
-                year--;
+            const monthKeys = [0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5];
+            let monthKey = monthKeys[month - 1];
+
+            if ((month === 1 || month === 2) && isLeapYear(year)) {
+                monthKey--;
             }
 
-            const century = Math.floor(year / 100);
-            const yearOfCentury = year % 100;
+            const yearLastTwoDigits = year % 100;
+            const leapYearCorrection = Math.floor(yearLastTwoDigits / 4);
+            const total = yearLastTwoDigits + leapYearCorrection + monthKey + day;
 
-            const weekDayNumber = (day + Math.floor((26 * (month + 1)) / 10) + yearOfCentury + Math.floor(yearOfCentury / 4) + Math.floor(century / 4) + 5 * century) % 7;
-
-            const weekDays = ['土', '日', '月', '火', '水', '木', '金'];
-            const dayOfWeek = weekDays[weekDayNumber];
+            const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
+            const dayOfWeek = weekDays[total % 7];
             const dayOfWeekClass = dayOfWeek === '日' ? 'sunday' : dayOfWeek === '土' ? 'saturday' : 'weekday';
-
-            
-            document.getElementById('formula').innerHTML = `\\[ (\\text{day} + \\left\\lfloor\\frac{26(\\text{month} + 1)}{10}\\right\\rfloor + \\text{yearOfCentury} + \\left\\lfloor\\frac{\\text{yearOfCentury}}{4}\\right\\rfloor + \\left\\lfloor\\frac{\\text{century}}{4}\\right\\rfloor + 5 \\times \\text{century}) \\mod 7 \\]`;
-            // MathJaxによる数式のレンダリングをトリガー
-            MathJax.typesetPromise();
 
             document.getElementById('result').innerHTML = `<span class="${dayOfWeekClass}">${year}年${month}月${day}日は${dayOfWeek}曜日です。</span>`;
             document.getElementById('calculationDetails').innerHTML = `
-                <div class="calculationItem"><strong>西暦年:</strong> ${year}</div>
-                <div class="calculationItem"><strong>月 (1月と2月は前年の13月、14月として扱う):</strong> ${month}</div>
-                <div class="calculationItem"><strong>日:</strong> ${day}</div>
-                <div class="calculationItem"><strong>年の世紀部分:</strong> ${century} (西暦年の上2桁)</div>
-                <div class="calculationItem"><strong>世紀の年部分:</strong> ${yearOfCentury} (西暦年の下2桁)</div>
-                <div class="calculationItem"><strong>計算結果 (曜日番号):</strong> ${weekDayNumber} (0:土曜日, 1:日曜日, ..., 6:金曜日)</div>
-                <div class="calculationItem"><strong>曜日:</strong> ${dayOfWeek}</div>
-`;
+                    <div class="calculationItem"><strong>年の後ろ2桁:</strong> ${yearLastTwoDigits} </div>
+                    <div class="calculationItem"><strong>閏年の補正:</strong> ${leapYearCorrection} (年の下2桁を4で割った商．閏年の周期を曜日の計算に反映させる)</div>
+                    <div class="calculationItem"><strong>月のキーコード:</strong> ${monthKey} (月を表す数値．月ごとの日数の偏りを調整する)</div>
+                    <div class="calculationItem"><strong>日:</strong> ${day} </div>
+                    <div class="calculationItem"><strong>合計:</strong> ${total} </div>
+                    <div class="calculationItem"><strong>曜日:</strong> ${total} mod 7 = ${total % 7}</div>
+                    <div class="calculationItem"><strong>mod7と曜日の対応:</strong> 0:日，1:月，2:火，3:水，4:木，5:金，6:土</div>
+                `;
+        }
 
+        function isLeapYear(year) {
+            return (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0));
         }
 
         function resetResult() {
