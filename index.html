@@ -2,26 +2,94 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>日付から曜日を計算</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>data-calc-app</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 50px;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
         }
 
-        #result {
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .input-field, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        #result, #calculationDetails, #monthKeyExplanation {
             margin-top: 20px;
-            font-size: 20px;
+            font-size: 16px;
+            color: black;
+            text-align: left;
+        }
+
+        .calculationItem {
+            margin-bottom: 10px;
+        }
+
+        .sunday {
+            color: red;
+        }
+
+        .saturday {
+            color: blue;
+        }
+
+        .weekday {
             color: green;
+        }
+
+        @media screen and (max-width: 600px) {
+            .container {
+                width: 90%;
+                padding: 10px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
 <body>
-    <h2>日付から曜日を計算</h2>
-    <input type="date" id="inputDate">
-    <button onclick="calculateDay()">曜日を計算</button>
-    <div id="result"></div>
+    <div class="container">
+        <h2>日付から曜日を計算（ツェラーの公式）</h2>
+        <input type="date" id="inputDate" class="input-field" value="1999-12-19">
+        <button onclick="calculateDay()" class="input-field">曜日を計算</button>
+        <button onclick="resetResult()" class="input-field">結果をリセット</button>
+        <div id="result"></div>
+        <div id="calculationDetails"></div>
+        <div id="monthKeyExplanation">
+            <p><strong>月のキーコード:</strong></p>
+            <ul>
+                <li>1月: 0 （閏年は6）</li>
+                <li>2月: 3 （閏年は2）</li>
+                <li>3月: 3</li>
+                <li>4月: 6</li>
+                <li>5月: 1</li>
+                <li>6月: 4</li>
+                <li>7月: 6</li>
+                <li>8月: 2</li>
+                <li>9月: 5</li>
+                <li>10月: 0</li>
+                <li>11月: 3</li>
+                <li>12月: 5</li>
+            </ul>
+        </div>
+    </div>
 
     <script>
         function calculateDay() {
@@ -32,28 +100,43 @@
             }
 
             const year = inputDate.getFullYear();
-            const month = inputDate.getMonth() + 1; // JavaScriptの月は0から始まる
+            const month = inputDate.getMonth() + 1;
             const day = inputDate.getDate();
 
             const monthKeys = [0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5];
             let monthKey = monthKeys[month - 1];
 
-            // 閏年の調整
             if ((month === 1 || month === 2) && isLeapYear(year)) {
                 monthKey--;
             }
 
             const yearLastTwoDigits = year % 100;
-            const total = yearLastTwoDigits + Math.floor(yearLastTwoDigits / 4) + monthKey + day;
+            const leapYearCorrection = Math.floor(yearLastTwoDigits / 4);
+            const total = yearLastTwoDigits + leapYearCorrection + monthKey + day;
 
             const weekDays = ['日', '月', '火', '水', '木', '金', '土'];
             const dayOfWeek = weekDays[total % 7];
+            const dayOfWeekClass = dayOfWeek === '日' ? 'sunday' : dayOfWeek === '土' ? 'saturday' : 'weekday';
 
-            document.getElementById('result').innerText = `${year}年${month}月${day}日は${dayOfWeek}曜日です。`;
+            document.getElementById('result').innerHTML = `<span class="${dayOfWeekClass}">${year}年${month}月${day}日は${dayOfWeek}曜日です。</span>`;
+            document.getElementById('calculationDetails').innerHTML = `
+                    <div class="calculationItem"><strong>年の後ろ2桁:</strong> ${yearLastTwoDigits} </div>
+                    <div class="calculationItem"><strong>閏年の補正:</strong> ${leapYearCorrection} (年の下2桁を4で割った商．閏年の周期を曜日の計算に反映させる)</div>
+                    <div class="calculationItem"><strong>月のキーコード:</strong> ${monthKey} (月を表す数値．月ごとの日数の偏りを調整する)</div>
+                    <div class="calculationItem"><strong>日:</strong> ${day} </div>
+                    <div class="calculationItem"><strong>合計:</strong> ${total} </div>
+                    <div class="calculationItem"><strong>曜日:</strong> ${total} mod 7 = ${total % 7}</div>
+                    <div class="calculationItem"><strong>mod7と曜日の対応:</strong> 0:日，1:月，2:火，3:水，4:木，5:金，6:土</div>
+                `;
         }
 
         function isLeapYear(year) {
             return (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0));
+        }
+
+        function resetResult() {
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('calculationDetails').innerHTML = '';
         }
     </script>
 </body>
