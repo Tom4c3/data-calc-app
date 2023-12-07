@@ -7,7 +7,6 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <title>day-calc-app</title>
     <style>
-        /* スタイルの改善 */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -32,12 +31,13 @@
             margin-top: 10px;
         }
 
-        #result, #calculationDetails, #formula {
+        #result, #calculationDetails {
             margin-top: 20px;
             padding: 10px;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: none; /* Initially hidden */
         }
 
         .calculationItem {
@@ -65,6 +65,12 @@
             h2 {
                 font-size: 24px;
             }
+
+            #formula {
+                text-align: center;
+                margin: 0 auto;
+            }
+
         }
     </style>
 </head>
@@ -74,9 +80,11 @@
         <input type="date" id="inputDate" class="input-field" value="1999-12-19">
         <button onclick="calculateDay()" class="input-field">曜日を計算</button>
         <button onclick="resetResult()" class="input-field">結果をリセット</button>
+        <div id="formula">
+             \[ \text{曜日番号} = (\text{日} + \left\lfloor \frac{26(\text{月} + 1)}{10} \right\rfloor + \text{世紀の年部分} + \left\lfloor \frac{\text{世紀の年部分}}{4} \right\rfloor + \left\lfloor \frac{\text{年の世紀部分}}{4} \right\rfloor + 5 \times \text{年の世紀部分}) \mod 7 \]
+        </div>
         <div id="result"></div>
         <div id="calculationDetails"></div>
-        <div id="formula"></div>
     </div>
 
     <script>
@@ -105,27 +113,28 @@
             const dayOfWeek = weekDays[weekDayNumber];
             const dayOfWeekClass = dayOfWeek === '日' ? 'sunday' : dayOfWeek === '土' ? 'saturday' : 'weekday';
 
-
-            document.getElementById('formula').innerHTML = `\\[ (\\text{day} + \\left\\lfloor\\frac{26(\\text{month} + 1)}{10}\\right\\rfloor + \\text{yearOfCentury} + \\left\\lfloor\\frac{\\text{yearOfCentury}}{4}\\right\\rfloor + \\left\\lfloor\\frac{\\text{century}}{4}\\right\\rfloor + 5 \\times \\text{century}) \\mod 7 \\]`;
-            // MathJaxによる数式のレンダリングをトリガー
-            MathJax.typesetPromise();
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('calculationDetails').style.display = 'block';
 
             document.getElementById('result').innerHTML = `<span class="${dayOfWeekClass}">${year}年${month}月${day}日は${dayOfWeek}曜日です。</span>`;
             document.getElementById('calculationDetails').innerHTML = `
-                    <div class="calculationItem"><strong>西暦年:</strong> ${year}</div>
-                    <div class="calculationItem"><strong>月 (1月と2月は前年の13月、14月として扱う):</strong> ${month}</div>
-                    <div class="calculationItem"><strong>日:</strong> ${day}</div>
-                    <div class="calculationItem"><strong>年の世紀部分:</strong> ${century} (西暦年の上2桁)</div>
-                    <div class="calculationItem"><strong>世紀の年部分:</strong> ${yearOfCentury} (西暦年の下2桁)</div>
-                    <div class="calculationItem"><strong>計算結果 (曜日番号):</strong> ${weekDayNumber} (0:土曜日, 1:日曜日, ..., 6:金曜日)</div>
-                    <div class="calculationItem"><strong>曜日:</strong> ${dayOfWeek}</div>
+                        <div class="calculationItem"><strong>西暦年:</strong> ${year}</div>
+                        <div class="calculationItem"><strong>月 (1月と2月は前年の13月、14月として扱う):</strong> ${month}</div>
+                        <div class="calculationItem"><strong>日:</strong> ${day}</div>
+                        <div class="calculationItem"><strong>年の世紀部分:</strong> ${century} (西暦年の上2桁)</div>
+                        <div class="calculationItem"><strong>世紀の年部分:</strong> ${yearOfCentury} (西暦年の下2桁)</div>
+                        <div class="calculationItem"><strong>計算結果 (曜日番号):</strong> ${weekDayNumber} (0:土曜日, 1:日曜日, ..., 6:金曜日)</div>
+                        <div class="calculationItem"><strong>曜日:</strong> ${dayOfWeek}</div>
 `;
-
+            // 数式のレンダリング
+            MathJax.typesetPromise();
         }
 
         function resetResult() {
             document.getElementById('result').innerHTML = '';
             document.getElementById('calculationDetails').innerHTML = '';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('calculationDetails').style.display = 'none';
         }
     </script>
 </body>
